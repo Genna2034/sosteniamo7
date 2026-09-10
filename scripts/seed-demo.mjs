@@ -23,7 +23,7 @@ async function user(email, profilo) {
   const { data: list } = await sb.auth.admin.listUsers({ perPage: 1000 });
   let u = list?.users.find(x => x.email === email);
   if (!u) { const { data, error } = await sb.auth.admin.createUser({ email, password: PASSWORD, email_confirm: true }); die(error, email); u = data.user; }
-  const { error } = await sb.from("profili_utenti").upsert({ id: u.id, email, attivo: true, ...profilo }); die(error, `profilo ${email}`);
+  const { error } = await sb.from("profili_utenti").upsert({ id: u.id, stato_attivo: "ATTIVO", ...profilo }); die(error, `profilo ${email}`);
   return u.id;
 }
 const pm = await user("pm@sosteniamo.invalid", { nome: "Luigi", cognome: "Vanore", ruolo: "PROJECT_MANAGER", ente_partner: "EMMANUEL", figura_id: fig("PM") });
