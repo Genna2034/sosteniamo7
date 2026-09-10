@@ -1,0 +1,1 @@
+{ "name": "SosteniAMO il Quartiere", "short_name": "SosteniAMO", "start_url": "/dashboard", "display": "standalone", "background_color": "#f1f4f6", "theme_color": "#1f3b5c", "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }] }

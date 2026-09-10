@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* Palette: carta fredda, inchiostro, blu istituzionale e verde "comunità educante".
+   Un solo elemento forte: il registro (griglia presenze) e le sue tessere di stato. */
+:root {
+  --paper: #f1f4f6;
+  --surface: #ffffff;
+  --ink: #16212b;
+  --ink-2: #4b5b6b;
+  --ink-3: #7d8b99;
+  --line: #d9e0e6;
+  --blu: #1f3b5c;
+  --blu-2: #2b5280;
+  --blu-soft: #e6eef8;
+  --verde: #2f7a5a;
+  --verde-soft: #e3f2ea;
+  --ambra: #b07a12;
+  --ambra-soft: #fbf1d9;
+  --rosso: #b23a2e;
+  --rosso-soft: #f9e4e1;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased;
+}
+button, input, textarea, select { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: -0.01em; }
+table { border-collapse: collapse; }
+:focus-visible { outline: 3px solid rgba(43, 82, 128, .45); outline-offset: 2px; }
+.safe-bottom { padding-bottom: max(.5rem, env(safe-area-inset-bottom)); }
+
+.field-input {
+  width: 100%; min-height: 2.75rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--surface);
+  padding: .5rem .75rem; color: var(--ink);
+}
+.field-input:disabled { background: var(--paper); color: var(--ink-3); }
+.field-input::placeholder { color: var(--ink-3); }
+textarea.field-input { min-height: 6rem; resize: vertical; }
+
+.stamp { display: inline-flex; align-items: center; gap: .35rem; border-radius: .375rem; padding: .2rem .55rem; font-size: .78rem; font-weight: 600; border: 1px solid transparent; }
+.stamp-neutral { background: #eef1f4; color: var(--ink-2); }
+.stamp-blu { background: var(--blu-soft); color: var(--blu); }
+.stamp-verde { background: var(--verde-soft); color: var(--verde); }
+.stamp-ambra { background: var(--ambra-soft); color: var(--ambra); }
+.stamp-rosso { background: var(--rosso-soft); color: var(--rosso); }
+
+/* Registro presenze: tessere radio grandi, tappabili con il pollice. */
+.presenza-opt { position: relative; }
+.presenza-opt input { position: absolute; inset: 0; opacity: 0; }
+.presenza-opt span {
+  display: flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 .5rem; border-radius: .5rem;
+  border: 1.5px solid var(--line); background: var(--surface); font-weight: 600; font-size: .85rem; color: var(--ink-2); cursor: pointer; user-select: none;
+}
+.presenza-opt input:focus-visible + span { outline: 3px solid rgba(43, 82, 128, .45); outline-offset: 2px; }
+.presenza-opt input:checked + span[data-v="PRESENTE"] { background: var(--verde); border-color: var(--verde); color: #fff; }
+.presenza-opt input:checked + span[data-v="RITARDO"] { background: var(--ambra); border-color: var(--ambra); color: #fff; }
+.presenza-opt input:checked + span[data-v="ASSENTE_GIUSTIFICATO"] { background: var(--ink-2); border-color: var(--ink-2); color: #fff; }
+.presenza-opt input:checked + span[data-v="ASSENTE_INGIUSTIFICATO"] { background: var(--rosso); border-color: var(--rosso); color: #fff; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .presenza-opt span { transition: background-color .12s, border-color .12s, color .12s; }
+}
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
+}
