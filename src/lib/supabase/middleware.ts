@@ -1,3 +1,4 @@
+import { supabasePublicEnv } from "@/lib/env";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -5,8 +6,7 @@ const PUBLIC_PATHS = ["/login", "/api/health", "/api/ready"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const { url, anonKey } = supabasePublicEnv();
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some(p => path === p || path.startsWith(p + "/"));
   if (!url || !anonKey) {
