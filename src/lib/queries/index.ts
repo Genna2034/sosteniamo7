@@ -32,10 +32,12 @@ export async function getDashboard(profile: CurrentProfile) {
 export async function listMinori() {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.from("minori")
-    .select("id,codice_identificativo,pseudonimo,stato,data_presa_in_carico,territorio_id,territori(codice,nome),piae(id,stato,data_scadenza_prossima_revisione),v_frequenza_minore_14gg(frequenza_pct,sessioni)")
+    .select("id,codice_identificativo,pseudonimo,stato,data_presa_in_carico,territorio_id,territori(codice,nome),piae(id,stato,data_scadenza_prossima_revisione)")
     .order("codice_identificativo").limit(400);
   if (error) throw error;
-  return data ?? [];
+  const { data: freq } = await supabase.from("v_frequenza_minore_14gg").select("minore_id,frequenza_pct,sessioni");
+  const byId = new Map((freq ?? []).map(f => [f.minore_id as string, f]));
+  return (data ?? []).map(r => ({ ...r, v_frequenza_minore_14gg: byId.get(r.id) ? [byId.get(r.id)!] : [] }));
 }
 
 export async function getMinore(id: string) {
@@ -43,7 +45,7 @@ export async function getMinore(id: string) {
   const { data: minore } = await supabase.from("minori").select("*,territori(codice,nome)").eq("id", id).maybeSingle();
   if (!minore) return null;
   const [assegnazioni, piae, contatti, presenze, escalation, iscrizioni, alerts, operatori, attivita] = await Promise.all([
-    supabase.from("assegnazioni_caso").select("id,ruolo_nel_caso,attiva,data_inizio,data_fine,profili_utenti(nome,cognome,ruolo)").eq("minore_id", id).order("attiva", { ascending: false }),
+    supabase.from("assegnazioni_caso").select("id,ruolo_nel_caso,attiva,data_inizio,data_fine,profili_utenti!assegnazioni_caso_utente_id_fkey(nome,cognome,ruolo)").eq("minore_id", id).order("attiva", { ascending: false }),
     supabase.from("piae").select("*,piae_obiettivi(*),piae_revisioni(*)").eq("minore_id", id).order("versione", { ascending: false }),
     supabase.from("contatti_settimanali").select("id,timestamp_contatto,canale,esito,durata_minuti,note_diario_bordo,piae_id").in("piae_id",
       (await supabase.from("piae").select("id").eq("minore_id", id)).data?.map(p => p.id) ?? ["00000000-0000-0000-0000-000000000000"]).order("timestamp_contatto", { ascending: false }).limit(30),
@@ -72,7 +74,7 @@ export async function getAttivita(id: string) {
   const { data: attivita } = await supabase.from("attivita").select("*,territori(codice,nome),rete_risorse(denominazione)").eq("id", id).maybeSingle();
   if (!attivita) return null;
   const [sessioni, iscritti, candidati, operatori] = await Promise.all([
-    supabase.from("sessioni_attivita").select("id,data_sessione,ora_inizio,ora_fine,minuti_erogati,stato,luogo,operatore_responsabile_id,profili_utenti(nome,cognome),partecipazioni(stato_presenza)").eq("attivita_id", id).order("data_sessione"),
+    supabase.from("sessioni_attivita").select("id,data_sessione,ora_inizio,ora_fine,minuti_erogati,stato,luogo,operatore_responsabile_id,profili_utenti!sessioni_attivita_operatore_responsabile_id_fkey(nome,cognome),partecipazioni(stato_presenza)").eq("attivita_id", id).order("data_sessione"),
     supabase.from("iscrizioni_attivita").select("id,attiva,minore_id,minori(codice_identificativo,pseudonimo)").eq("attivita_id", id).eq("attiva", true),
     supabase.from("minori").select("id,codice_identificativo,pseudonimo").eq("territorio_id", attivita.territorio_id).eq("stato", "IN_CARICO").order("codice_identificativo"),
     supabase.from("profili_utenti").select("id,nome,cognome").eq("territorio_id", attivita.territorio_id).eq("stato_attivo", "ATTIVO").order("cognome"),
@@ -120,7 +122,7 @@ export async function getAlertCenter() {
     supabase.from("escalation_sla_status").select("*").order("timestamp_apertura", { ascending: false }).limit(100),
   ]);
   const escIds = (escalations.data ?? []).map(e => e.id);
-  const eventi = escIds.length ? (await supabase.from("escalation_eventi").select("id,escalation_id,tipo_evento,timestamp,descrizione,stato_precedente,stato_successivo,profili_utenti(nome,cognome)").in("escalation_id", escIds).order("timestamp", { ascending: false })).data ?? [] : [];
+  const eventi = escIds.length ? (await supabase.from("escalation_eventi").select("id,escalation_id,tipo_evento,timestamp,descrizione,stato_precedente,stato_successivo,profili_utenti!escalation_eventi_attore_id_fkey(nome,cognome)").in("escalation_id", escIds).order("timestamp", { ascending: false })).data ?? [] : [];
   const minori = escIds.length ? (await supabase.from("minori").select("id,pseudonimo,codice_identificativo").in("id", (escalations.data ?? []).map(e => e.minore_id))).data ?? [] : [];
   return { alerts: alerts.data ?? [], escalations: escalations.data ?? [], eventi, minori };
 }
