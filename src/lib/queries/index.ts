@@ -147,3 +147,29 @@ export async function getEducatorQuickData() {
     .map(p => { const m = p.minori as unknown as { codice_identificativo: string; pseudonimo: string } | null; return { piaeId: p.id, minoreId: p.minore_id, label: `${m?.pseudonimo ?? "Beneficiario"} · ${m?.codice_identificativo ?? ""}` }; });
   return { profile, cases };
 }
+
+// Vista "Oggi" per gli operatori: sessioni del giorno, contatti della settimana, ore, cose da vidimare.
+export async function getOggi(profile: CurrentProfile) {
+  const supabase = await createSupabaseServerClient();
+  const oggi = new Date().toISOString().slice(0, 10);
+  const lunedi = new Date(); lunedi.setDate(lunedi.getDate() - ((lunedi.getDay() + 6) % 7)); const daLunedi = lunedi.toISOString().slice(0, 10);
+  const isCoord = profile.ruolo === "COORDINATORE";
+  const [sessioni, assegnazioni, ore, daVidimare, alerts, escalations, kpi] = await Promise.all([
+    supabase.from("sessioni_attivita").select("id,attivita_id,data_sessione,ora_inizio,ora_fine,stato,luogo,operatore_responsabile_id,attivita(titolo,tipo,territorio_id,territori(codice,nome)),partecipazioni(id)")
+      .gte("data_sessione", oggi).lte("data_sessione", oggi).neq("stato", "ANNULLATA").order("ora_inizio"),
+    supabase.from("assegnazioni_caso").select("minore_id,minori(id,pseudonimo,codice_identificativo,stato,territori(codice))").eq("utente_id", profile.id).eq("attiva", true),
+    supabase.from("timesheet").select("ore,stato,data").eq("utente_id", profile.id).gte("data", daLunedi),
+    isCoord ? supabase.from("timesheet").select("id", { count: "exact", head: true }).eq("stato", "INVIATO").neq("utente_id", profile.id) : Promise.resolve({ count: 0 }),
+    supabase.from("alert_automatici").select("id,codice_alert,minore_id,timestamp_rilevamento,minori(pseudonimo)").eq("risolto", false).order("timestamp_rilevamento", { ascending: false }).limit(6),
+    supabase.from("escalation_sla_status").select("id,minore_id,stato,sla,timestamp_apertura").neq("sla", "CHIUSA").order("timestamp_apertura").limit(6),
+    isCoord ? supabase.from("v_kpi_territorio").select("*").eq("territorio_id", profile.territorio_id ?? "").maybeSingle() : Promise.resolve({ data: null }),
+  ]);
+  const miei = (assegnazioni.data ?? []).map(a => a.minori as unknown as { id: string; pseudonimo: string; codice_identificativo: string; stato: string; territori: { codice: string } | null } | null).filter((m): m is NonNullable<typeof m> => !!m && m.stato === "IN_CARICO");
+  const ids = miei.map(m => m.id);
+  const contatti = ids.length ? (await supabase.from("contatti_settimanali").select("piae_id,esito,piae!inner(minore_id)").gte("timestamp_contatto", `${daLunedi}T00:00:00`).in("piae.minore_id", ids)).data ?? [] : [];
+  const contattiPer = new Map<string, number>();
+  for (const c of contatti) { const mid = (c.piae as unknown as { minore_id: string }).minore_id; if (c.esito === "RIUSCITO") contattiPer.set(mid, (contattiPer.get(mid) ?? 0) + 1); }
+  const oreSett = (ore.data ?? []).reduce((t, r) => t + Number(r.ore), 0);
+  const oreOggi = (ore.data ?? []).filter(r => r.data === oggi).reduce((t, r) => t + Number(r.ore), 0);
+  return { oggi, sessioni: sessioni.data ?? [], miei: miei.map(m => ({ ...m, contatti: contattiPer.get(m.id) ?? 0 })), oreSett, oreOggi, daVidimare: (daVidimare as { count: number | null }).count ?? 0, alerts: alerts.data ?? [], escalations: escalations.data ?? [], kpi: (kpi as { data: Record<string, unknown> | null }).data };
+}

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/security/authz";
 import { getDashboard } from "@/lib/queries";
-import { Empty, PageHeader, Panel, Stamp, Stat, td, th } from "@/components/ui/primitives";
+import { Empty, PageHeader, Panel, Stamp, Stat, Territorio, td, th } from "@/components/ui/primitives";
+import { OggiView } from "./oggi";
 import { FrequencyChart } from "@/components/dashboard/frequency-chart";
 import { formatPercent, hours, shortDate } from "@/lib/utils";
 import { ALERT_LABEL, ROLE_LABEL, STATO_ESCALATION_LABEL } from "@/types/domain";
@@ -10,6 +11,7 @@ export const metadata = { title: "Cruscotto" };
 
 export default async function DashboardPage() {
   const profile = await requireProfile();
+  if (profile.ruolo !== "PROJECT_MANAGER" && profile.ruolo !== "AMMINISTRATIVO") return <OggiView profile={profile} />;
   const d = await getDashboard(profile);
   const sum = (k: string) => d.territori.reduce((t, x) => t + Number((x as Record<string, unknown>)[k] ?? 0), 0);
   const freqValues = d.territori.map(t => Number(t.frequenza_media_14gg)).filter(v => !Number.isNaN(v));
@@ -23,11 +25,11 @@ export default async function DashboardPage() {
       <PageHeader title="Cruscotto di progetto" lead={<>Vista {ROLE_LABEL[profile.ruolo].toLowerCase()} su {scope}. {giorniAllaFine != null ? (giorniAllaFine >= 0 ? `Mancano ${giorniAllaFine} giorni alla chiusura dell'erogazione (${shortDate(d.config?.data_fine_erogazione)}).` : `Erogazione chiusa il ${shortDate(d.config?.data_fine_erogazione)}: fase di rendicontazione.`) : null}</>} />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Beneficiari in carico" value={sum("beneficiari_in_carico")} sub={d.territori.length > 1 ? `Target contrattuale ${target}` : `Target territoriale ${Math.round(target / 7)}`} tone="blu" />
+        <Stat label="Ragazzi in carico" value={sum("beneficiari_in_carico")} sub={`su ${target} previsti dal contratto`} tone="blu" progress={{ value: sum("beneficiari_in_carico"), max: target }} />
         <Stat label="PIAE attivi" value={sum("piae_attivi")} sub="Piani con contratto sociale e revisione a 60 giorni" tone="blu" />
         <Stat label="Frequenza media (14 giorni)" value={formatPercent(freqMedia)} sub={`Soglia di alert ${formatPercent(d.config?.soglia_frequenza ?? 70)}`} tone={freqMedia != null && freqMedia < (d.config?.soglia_frequenza ?? 70) ? "rosso" : "verde"} />
-        <Stat label="Ore erogate" value={hours(sum("ore_erogate"))} sub={`${sum("laboratori")} laboratori · ${sum("corsi_sportivi")} corsi sportivi`} tone="verde" />
-        <Stat label="Realtà mappate" value={sum("risorse_mappate")} sub={`Target ${d.config?.target_risorse ?? 70} · AOT attivi ${sum("aot_attivi")}`} />
+        <Stat label="Ore di attività erogate" value={hours(sum("ore_erogate"))} sub={`${sum("laboratori")} laboratori e ${sum("corsi_sportivi")} corsi sportivi (14 + 7 previsti)`} tone="verde" />
+        <Stat label="Comunità educante" value={sum("risorse_mappate")} sub={`realtà su ${d.config?.target_risorse ?? 70} · ${sum("aot_attivi")} accordi AOT su 14`} tone="blu" progress={{ value: sum("risorse_mappate"), max: d.config?.target_risorse ?? 70 }} />
         <Stat label="Ore timesheet vidimate" value={hours(sum("ore_timesheet_vidimate"))} sub="Giustificativo rendicontabile" />
         <Stat label="Alert aperti" value={sum("alert_aperti")} sub="Frequenza, contatti, revisioni, AOT" tone={sum("alert_aperti") ? "ambra" : "neutral"} />
         <Stat label="Escalation aperte" value={sum("escalation_aperte")} sub="Protocollo PER: 4h / 12h / 24h / 48h" tone={sum("escalation_aperte") ? "rosso" : "neutral"} />
@@ -46,7 +48,7 @@ export default async function DashboardPage() {
               <tbody className="divide-y divide-[var(--line)]">
                 {d.territori.map(t => (
                   <tr key={t.territorio_id}>
-                    <td className={td}><span className="font-semibold">{t.codice}</span> <span className="text-[var(--ink-3)]">{t.nome}</span></td>
+                    <td className={td}><Territorio codice={t.codice} nome={t.nome} /></td>
                     <td className={td}>{t.beneficiari_in_carico}</td><td className={td}>{t.piae_attivi}</td>
                     <td className={td}>{formatPercent(t.frequenza_media_14gg)}</td><td className={td}>{t.laboratori}</td><td className={td}>{t.corsi_sportivi}</td>
                     <td className={td}>{hours(t.ore_erogate)}</td><td className={td}>{t.aot_attivi}/2</td>

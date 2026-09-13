@@ -5,7 +5,7 @@ export const metadata = { title: "Accesso" };
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; err?: string }> }) {
   const sp = await searchParams;
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--blu)] p-4">
+    <main className="flex min-h-screen items-center justify-center p-4" style={{ background: "linear-gradient(160deg, #0f5f6c 0%, #157a89 55%, #1f8a5a 100%)" }}>
       <div className="w-full max-w-sm">
         <div className="mb-6 text-white">
           <div className="text-2xl font-bold leading-tight">SosteniAMO<br />il Quartiere</div>

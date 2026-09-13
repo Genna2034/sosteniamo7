@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/security/authz";
 import { listMinori } from "@/lib/queries";
-import { Button, Empty, PageHeader, Panel, Stamp, td, th } from "@/components/ui/primitives";
+import { Button, Empty, PageHeader, Panel, Stamp, Territorio, td, th } from "@/components/ui/primitives";
+import { coloreTerritorio } from "@/lib/territori";
 import { formatPercent, shortDate } from "@/lib/utils";
 
 export const metadata = { title: "Beneficiari" };
@@ -11,8 +12,8 @@ export default async function BeneficiariPage() {
   const rows = await listMinori();
   return (
     <div>
-      <PageHeader title="Beneficiari" lead="Anagrafica pseudonimizzata dei giovani presi in carico: il codice identificativo è l'unico riferimento che circola nei registri e negli export."
-        actions={profile.ruolo === "COORDINATORE" ? <Link href="/beneficiari/nuovo"><Button>Nuova presa in carico</Button></Link> : null} />
+      <PageHeader title="I ragazzi" lead="Ogni ragazzo ha un codice e uno pseudonimo: sono gli unici riferimenti che circolano in registri, report ed export."
+        actions={profile.ruolo === "COORDINATORE" ? <Link href="/beneficiari/nuovo"><Button>Prendi in carico</Button></Link> : null} />
       <Panel>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -25,9 +26,9 @@ export default async function BeneficiariPage() {
                 const freq = Array.isArray(f) ? f[0] : f;
                 return (
                   <tr key={r.id} className="hover:bg-[var(--paper)]">
-                    <td className={td}><Link href={`/beneficiari/${r.id}`} className="font-mono text-xs font-semibold text-[var(--blu)]">{r.codice_identificativo}</Link></td>
-                    <td className={td}><Link href={`/beneficiari/${r.id}`} className="font-medium">{r.pseudonimo}</Link></td>
-                    <td className={td}>{t?.codice}</td>
+                    <td className={td}><Link href={`/beneficiari/${r.id}`} className="font-mono text-xs font-semibold text-[var(--ink-2)]">{r.codice_identificativo}</Link></td>
+                    <td className={td}><Link href={`/beneficiari/${r.id}`} className="flex items-center gap-2 font-bold"><span className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-extrabold text-white" style={{ background: coloreTerritorio(t?.codice) }}>{r.pseudonimo.slice(0, 1)}</span>{r.pseudonimo}</Link></td>
+                    <td className={td}><Territorio codice={t?.codice} /></td>
                     <td className={td}><Stamp tone={r.stato === "IN_CARICO" ? "verde" : r.stato === "SOSPESO" ? "ambra" : "neutral"}>{r.stato.replaceAll("_", " ").toLowerCase()}</Stamp></td>
                     <td className={td}>{piae ? <Stamp tone="blu">attivo</Stamp> : <span className="text-[var(--ink-3)]">da avviare</span>}</td>
                     <td className={td}>{piae ? shortDate(piae.data_scadenza_prossima_revisione) : "—"}</td>

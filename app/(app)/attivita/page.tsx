@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/security/authz";
 import { listAttivita } from "@/lib/queries";
-import { Button, Empty, PageHeader, Panel, Stamp, td, th } from "@/components/ui/primitives";
+import { Button, Empty, PageHeader, Panel, Progress, Stamp, Territorio, td, th } from "@/components/ui/primitives";
+import { coloreTerritorio } from "@/lib/territori";
 import { hours, shortDate } from "@/lib/utils";
 import { TIPO_ATTIVITA_LABEL } from "@/types/domain";
 
@@ -26,11 +27,11 @@ export default async function AttivitaPage() {
             return (
               <tr key={a.id} className="hover:bg-[var(--paper)]">
                 <td className={td}><Link href={`/attivita/${a.id}`} className="font-medium text-[var(--blu)]">{a.titolo}</Link></td>
-                <td className={td}>{TIPO_ATTIVITA_LABEL[a.tipo]}</td><td className={td}>{t?.codice}</td><td className={td}>{a.ente_erogatore ?? "—"}</td>
+                <td className={td}>{TIPO_ATTIVITA_LABEL[a.tipo]}</td><td className={td}><Territorio codice={t?.codice} /></td><td className={td}>{a.ente_erogatore ?? "—"}</td>
                 <td className={td}>{shortDate(a.data_inizio)} – {shortDate(a.data_fine)}</td>
                 <td className={td}>{(a.iscrizioni_attivita as unknown[]).length}</td>
                 <td className={td}>{sess.filter(s => s.stato === "EROGATA").length}/{sess.length}</td>
-                <td className={td}><span className={sotto ? "text-[var(--rosso)] font-semibold" : ""}>{hours(erogate)}</span> <span className="text-[var(--ink-3)]">/ {a.ore_minime_previste} h</span></td>
+                <td className={td}><div className="min-w-28"><span className={sotto ? "text-[var(--rosso)] font-bold" : "font-bold"}>{hours(erogate)}</span> <span className="text-[var(--ink-3)]">/ {a.ore_minime_previste} h</span><div className="mt-1"><Progress value={erogate} max={Number(a.ore_minime_previste) || 1} tone={coloreTerritorio(t?.codice)} /></div></div></td>
                 <td className={td}><Stamp tone={a.stato === "IN_CORSO" ? "verde" : a.stato === "CONCLUSA" ? "neutral" : "blu"}>{a.stato.toLowerCase()}</Stamp></td>
               </tr>); })}</tbody></table>
           {!rows.length ? <Empty>Nessuna attività programmata. Il capitolato richiede per territorio almeno due laboratori e due corsi sportivi da 8 ore minime ciascuno.</Empty> : null}</div>

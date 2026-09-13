@@ -56,11 +56,11 @@ for (const t of territori) {
 console.log(`Beneficiari: ${seq}`);
 
 // Attività: 2 laboratori + 1 corso sportivo per territorio, con sessioni e presenze.
-const lab = [["LABORATORIO", "Laboratorio musicale – freestyle rap e beatbox", "MDS"], ["LABORATORIO", "Laboratorio di street art e grafica", "EITD"], ["CORSO_SPORTIVO", "Corso di calcio a 5 e boxe educativa", "EMMANUEL"]];
+const lab = [["LABORATORIO_ARTIGIANO", "Laboratorio musicale – freestyle rap e beatbox", "MDS"], ["LABORATORIO_ARTIGIANO", "Laboratorio di street art e grafica", "EITD"], ["CORSO_SPORTIVO", "Corso di calcio a 5 e boxe educativa", "EMMANUEL"]];
 let sessCount = 0;
 for (const t of territori) for (const [tipo, titolo, ente] of lab) {
   const a = await ensure("attivita", { territorio_id: t.id, titolo: `${titolo} – ${t.nome}` }, { tipo, ente_erogatore: ente, ore_minime_previste: 8, data_inizio: "2026-09-01", data_fine: "2026-09-30", stato: "IN_CORSO", created_by: coord[t.codice] });
-  const iscritti = minori[t.codice].slice(tipo === "LABORATORIO" ? 0 : 8, tipo === "LABORATORIO" ? 8 : 16);
+  const iscritti = minori[t.codice].slice(tipo === "LABORATORIO_ARTIGIANO" ? 0 : 8, tipo === "LABORATORIO_ARTIGIANO" ? 8 : 16);
   for (const m of iscritti) await sb.from("iscrizioni_attivita").upsert({ attivita_id: a.id, minore_id: m, data_iscrizione: "2026-09-01", attiva: true }, { onConflict: "attivita_id,minore_id" });
   for (let d = 2; d <= 9; d += 7) {
     const s = await ensure("sessioni_attivita", { attivita_id: a.id, data_sessione: `2026-09-${String(d).padStart(2, "0")}`, ora_inizio: "15:00" }, { ora_fine: "17:00", operatore_responsabile_id: edu[t.codice][0], stato: "EROGATA", luogo: "Sede di territorio" });

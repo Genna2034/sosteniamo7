@@ -9,7 +9,9 @@ import { enrollAction } from "@/lib/actions/attivita";
 import { createClinicalNoteAction } from "@/lib/actions/clinical";
 import { ActionForm } from "@/components/forms/action-form";
 import { ClinicalPanel } from "@/components/forms/clinical-panel";
-import { Empty, Field, PageHeader, Panel, Stamp, td, th } from "@/components/ui/primitives";
+import { Empty, Field, PageHeader, Panel, Stamp, Territorio, td, th } from "@/components/ui/primitives";
+import { coloreTerritorio } from "@/lib/territori";
+import { CheckCircle2, Circle } from "lucide-react";
 import { formatPercent, longDateTime, shortDate, todayIso } from "@/lib/utils";
 import { ALERT_LABEL, PRESENZA_LABEL, ROLE_LABEL, STATO_ESCALATION_LABEL } from "@/types/domain";
 
@@ -31,10 +33,30 @@ export default async function BeneficiarioPage({ params }: { params: Promise<{ i
   const educatori = d.operatori.filter(o => o.ruolo === "EDUCATORE");
   const specialisti = d.operatori.filter(o => o.ruolo === "PSICOLOGO" || o.ruolo === "ASSISTENTE_SOCIALE" || o.ruolo === "ALTRO_SPECIALISTA");
 
+  // Cosa manca per un percorso "a norma": guida l'operatore invece di mostrare pannelli vuoti.
+  const settimana = new Date(); settimana.setDate(settimana.getDate() - 7);
+  const contattiSett = d.contatti.filter(c => c.esito === "RIUSCITO" && new Date(c.timestamp_contatto) >= settimana).length;
+  const passi: Array<[string, boolean, string]> = [
+    ["Equipe assegnata", d.assegnazioni.some(a => a.attiva), "Il Coordinatore assegna l'educatore case manager"],
+    ["PIAE avviato", !!piaeAttivo, "Piano individualizzato entro 30 giorni dalla presa in carico"],
+    ["Contratto sociale firmato", !!piaeAttivo?.contratto_sociale_firmato, "Impegno reciproco firmato con il ragazzo"],
+    ["Tre obiettivi SMART", ((piaeAttivo?.piae_obiettivi as unknown[] | undefined)?.length ?? 0) >= 3, "Formativo, relazionale, di responsabilità"],
+    ["Iscritto a un'attività", d.iscrizioni.some(i => i.attiva), "Laboratorio o corso sportivo del territorio"],
+    ["2 contatti questa settimana", contattiSett >= 2, `${contattiSett} contatti riusciti negli ultimi 7 giorni`],
+  ];
+  const fatti = passi.filter(p => p[1]).length;
+  const tone = coloreTerritorio(t?.codice);
   return (
     <div>
-      <PageHeader title={minore.pseudonimo}
-        lead={<><span className="font-mono">{minore.codice_identificativo}</span> · {t?.nome} · in carico dal {shortDate(minore.data_presa_in_carico)} · <Stamp tone={minore.stato === "IN_CARICO" ? "verde" : "ambra"}>{minore.stato.replaceAll("_", " ").toLowerCase()}</Stamp></>} />
+      <PageHeader title={minore.pseudonimo} kicker={<span className="flex flex-wrap items-center gap-2"><Territorio codice={t?.codice} nome={t?.nome} /><span className="font-mono text-xs text-[var(--ink-3)]">{minore.codice_identificativo}</span><Stamp tone={minore.stato === "IN_CARICO" ? "verde" : "ambra"}>{minore.stato.replaceAll("_", " ").toLowerCase()}</Stamp></span>}
+        lead={<>In carico dal {shortDate(minore.data_presa_in_carico)}{piaeAttivo ? `, PIAE dal ${shortDate(piaeAttivo.data_inizio)}` : ""}.</>} />
+
+      <div className="card card-tone mb-5 p-4" style={{ "--tone": tone } as React.CSSProperties}>
+        <div className="flex items-center justify-between gap-3"><h2>Percorso: {fatti} passi su {passi.length}</h2><span className="text-xs font-semibold text-[var(--ink-3)]">{fatti === passi.length ? "tutto in ordine" : `${passi.length - fatti} da completare`}</span></div>
+        <ul className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          {passi.map(([l, ok, h]) => <li key={l} className="flex items-start gap-2 text-sm">{ok ? <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0" style={{ color: "var(--verde)" }} aria-hidden /> : <Circle className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[var(--ink-3)]" aria-hidden />}<span><span className={ok ? "font-semibold" : "font-semibold text-[var(--ink)]"}>{l}</span><span className="block text-xs text-[var(--ink-3)]">{h}</span></span></li>)}
+        </ul>
+      </div>
 
       {d.alerts.length ? (
         <div className="mb-5 grid gap-2">
