@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import Link from "next/link";
 import { requireProfile } from "@/lib/security/authz";
 import { listMinori } from "@/lib/queries";
@@ -7,7 +8,7 @@ import { formatPercent, shortDate } from "@/lib/utils";
 
 export const metadata = { title: "Beneficiari" };
 
-export default async function BeneficiariPage() {
+async function BeneficiariPage() {
   const profile = await requireProfile();
   const rows = await listMinori();
   return (
@@ -45,3 +46,5 @@ export default async function BeneficiariPage() {
     </div>
   );
 }
+
+export default guard(BeneficiariPage);

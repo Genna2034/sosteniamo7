@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import Link from "next/link";
 import { requireProfile } from "@/lib/security/authz";
 import { listAttivita } from "@/lib/queries";
@@ -8,7 +9,7 @@ import { TIPO_ATTIVITA_LABEL } from "@/types/domain";
 
 export const metadata = { title: "Attività e registri" };
 
-export default async function AttivitaPage() {
+async function AttivitaPage() {
   const profile = await requireProfile();
   const rows = await listAttivita();
   const canCreate = profile.ruolo === "COORDINATORE" || profile.ruolo === "PROJECT_MANAGER";
@@ -39,3 +40,5 @@ export default async function AttivitaPage() {
     </div>
   );
 }
+
+export default guard(AttivitaPage);

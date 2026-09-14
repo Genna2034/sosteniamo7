@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import { requireProfile, requireRole } from "@/lib/security/authz";
 import { getReferenceData, getReport } from "@/lib/queries";
 import { Button, PageHeader, Panel, Stat, td, th } from "@/components/ui/primitives";
@@ -8,7 +9,7 @@ export const metadata = { title: "Report al RUP" };
 
 function isoWeekAgo() { const d = new Date(); d.setDate(d.getDate() - 7); return d.toISOString().slice(0, 10); }
 
-export default async function ReportPage({ searchParams }: { searchParams: Promise<{ dal?: string; al?: string }> }) {
+async function ReportPage({ searchParams }: { searchParams: Promise<{ dal?: string; al?: string }> }) {
   const profile = await requireProfile(); requireRole(profile, ["PROJECT_MANAGER", "COORDINATORE", "AMMINISTRATIVO"]);
   const sp = await searchParams; const ref = await getReferenceData();
   const dal = sp.dal ?? isoWeekAgo(); const al = sp.al ?? new Date().toISOString().slice(0, 10);
@@ -38,3 +39,5 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
     </div>
   );
 }
+
+export default guard(ReportPage);

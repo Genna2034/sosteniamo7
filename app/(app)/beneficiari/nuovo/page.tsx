@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import { requireProfile, requireRole } from "@/lib/security/authz";
 import { getReferenceData } from "@/lib/queries";
 import { createMinorAction } from "@/lib/actions/minori";
@@ -7,7 +8,7 @@ import { todayIso } from "@/lib/utils";
 
 export const metadata = { title: "Nuova presa in carico" };
 
-export default async function NuovoBeneficiarioPage() {
+async function NuovoBeneficiarioPage() {
   const profile = await requireProfile(); requireRole(profile, ["COORDINATORE"]);
   const ref = await getReferenceData();
   const territorio = ref.territori.find(t => t.id === profile.territorio_id);
@@ -39,3 +40,5 @@ export default async function NuovoBeneficiarioPage() {
     </div>
   );
 }
+
+export default guard(NuovoBeneficiarioPage);

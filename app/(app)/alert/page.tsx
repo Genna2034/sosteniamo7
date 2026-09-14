@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import Link from "next/link";
 import { requireProfile } from "@/lib/security/authz";
 import { getAlertCenter } from "@/lib/queries";
@@ -10,7 +11,7 @@ import { ALERT_LABEL, STATO_ESCALATION_LABEL } from "@/types/domain";
 
 export const metadata = { title: "Alert e PER" };
 
-export default async function AlertPage() {
+async function AlertPage() {
   const profile = await requireProfile();
   const d = await getAlertCenter();
   const direttivo = profile.ruolo === "COORDINATORE" || profile.ruolo === "PROJECT_MANAGER";
@@ -49,3 +50,5 @@ export default async function AlertPage() {
     </div>
   );
 }
+
+export default guard(AlertPage);

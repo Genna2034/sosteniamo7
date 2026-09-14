@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import Link from "next/link";
 import { listMinori } from "@/lib/queries";
 import { Empty, PageHeader, Panel, Stamp, td, th } from "@/components/ui/primitives";
@@ -5,7 +6,7 @@ import { shortDate } from "@/lib/utils";
 
 export const metadata = { title: "Registro PIAE" };
 
-export default async function PiaePage() {
+async function PiaePage() {
   const rows = await listMinori();
   const items = rows.flatMap(r => (r.piae as unknown as Array<{ id: string; stato: string; data_scadenza_prossima_revisione: string }>).map(p => ({ ...p, minore: r })))
     .sort((a, b) => a.data_scadenza_prossima_revisione.localeCompare(b.data_scadenza_prossima_revisione));
@@ -19,3 +20,5 @@ export default async function PiaePage() {
     </div>
   );
 }
+
+export default guard(PiaePage);

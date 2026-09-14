@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireProfile } from "@/lib/security/authz";
@@ -10,7 +11,7 @@ import { TIPO_ATTIVITA_LABEL } from "@/types/domain";
 
 export const metadata = { title: "Attività" };
 
-export default async function AttivitaDettaglio({ params }: { params: Promise<{ id: string }> }) {
+async function AttivitaDettaglio({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const profile = await requireProfile();
   const d = await getAttivita(id);
@@ -59,3 +60,5 @@ export default async function AttivitaDettaglio({ params }: { params: Promise<{ 
     </div>
   );
 }
+
+export default guard(AttivitaDettaglio);

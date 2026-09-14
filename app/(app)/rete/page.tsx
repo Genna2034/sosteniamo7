@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import { requireProfile } from "@/lib/security/authz";
 import { getRete } from "@/lib/queries";
 import { createAotAction, createResourceAction } from "@/lib/actions/rete";
@@ -8,7 +9,7 @@ import { shortDate } from "@/lib/utils";
 export const metadata = { title: "Rete e accordi" };
 const TIPI = { SCUOLA: "Scuola", SERVIZIO_SOCIALE: "Servizio sociale", BOTTEGA: "Bottega artigiana", ASD: "Associazione sportiva", TERZO_SETTORE: "Terzo settore", IMPRESA: "Impresa", PARROCCHIA: "Parrocchia / oratorio", ALTRO: "Altro" } as const;
 
-export default async function RetePage() {
+async function RetePage() {
   const profile = await requireProfile();
   const d = await getRete();
   const direttivo = profile.ruolo === "COORDINATORE" || profile.ruolo === "PROJECT_MANAGER";
@@ -54,3 +55,5 @@ export default async function RetePage() {
     </div>
   );
 }
+
+export default guard(RetePage);

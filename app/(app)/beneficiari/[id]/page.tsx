@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireProfile } from "@/lib/security/authz";
@@ -17,7 +18,7 @@ import { ALERT_LABEL, PRESENZA_LABEL, ROLE_LABEL, STATO_ESCALATION_LABEL } from 
 
 export const metadata = { title: "Scheda beneficiario" };
 
-export default async function BeneficiarioPage({ params }: { params: Promise<{ id: string }> }) {
+async function BeneficiarioPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const profile = await requireProfile();
   const d = await getMinore(id);
@@ -197,3 +198,5 @@ export default async function BeneficiarioPage({ params }: { params: Promise<{ i
     </div>
   );
 }
+
+export default guard(BeneficiarioPage);

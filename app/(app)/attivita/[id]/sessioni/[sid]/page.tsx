@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireProfile } from "@/lib/security/authz";
@@ -11,7 +12,7 @@ export const metadata = { title: "Registro presenze" };
 
 const OPZIONI = [["PRESENTE", "Presente"], ["RITARDO", "Ritardo"], ["ASSENTE_GIUSTIFICATO", "Ass. giust."], ["ASSENTE_INGIUSTIFICATO", "Assente"]] as const;
 
-export default async function RegistroPage({ params }: { params: Promise<{ id: string; sid: string }> }) {
+async function RegistroPage({ params }: { params: Promise<{ id: string; sid: string }> }) {
   const { id, sid } = await params;
   const profile = await requireProfile();
   const d = await getRegistroSessione(sid);
@@ -50,3 +51,5 @@ export default async function RegistroPage({ params }: { params: Promise<{ id: s
     </div>
   );
 }
+
+export default guard(RegistroPage);

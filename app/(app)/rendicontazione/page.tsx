@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import { requireProfile, requireRole } from "@/lib/security/authz";
 import { getReferenceData, getRendicontazione } from "@/lib/queries";
 import { aggregaPer, confrontoQuoteRti, totale, type RigaOre } from "@/lib/rendicontazione";
@@ -6,7 +7,7 @@ import { euro, hours, shortDate } from "@/lib/utils";
 
 export const metadata = { title: "Rendicontazione" };
 
-export default async function RendicontazionePage({ searchParams }: { searchParams: Promise<{ dal?: string; al?: string }> }) {
+async function RendicontazionePage({ searchParams }: { searchParams: Promise<{ dal?: string; al?: string }> }) {
   const profile = await requireProfile(); requireRole(profile, ["PROJECT_MANAGER", "COORDINATORE", "AMMINISTRATIVO"]);
   const sp = await searchParams; const ref = await getReferenceData();
   const dal = sp.dal ?? ref.config?.data_avvio ?? "2026-08-04"; const al = sp.al ?? ref.config?.data_fine_progetto ?? "2027-01-31";
@@ -41,3 +42,5 @@ export default async function RendicontazionePage({ searchParams }: { searchPara
     </div>
   );
 }
+
+export default guard(RendicontazionePage);

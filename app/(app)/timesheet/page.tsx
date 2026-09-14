@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import { requireProfile } from "@/lib/security/authz";
 import { getReferenceData, getTimesheetData } from "@/lib/queries";
 import { createTimesheetAction, deleteTimesheetAction, reviewTimesheetAction } from "@/lib/actions/timesheet";
@@ -9,7 +10,7 @@ export const metadata = { title: "Le mie ore" };
 
 type Riga = { id: string; data: string; ore: number; stato: string; descrizione: string; nome: string; cognome: string; figura_descrizione: string; tariffa_oraria: number; valore_parametrico: number; territorio_codice: string | null; attivita_titolo: string | null; note_vidimazione?: string | null };
 
-export default async function TimesheetPage() {
+async function TimesheetPage() {
   const profile = await requireProfile();
   const [ref, d] = await Promise.all([getReferenceData(), getTimesheetData(profile)]);
   const mine = d.mine as Riga[]; const toReview = d.toReview as Riga[];
@@ -62,3 +63,5 @@ export default async function TimesheetPage() {
     </div>
   );
 }
+
+export default guard(TimesheetPage);

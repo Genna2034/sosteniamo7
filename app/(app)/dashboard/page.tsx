@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import Link from "next/link";
 import { requireProfile } from "@/lib/security/authz";
 import { getDashboard } from "@/lib/queries";
@@ -9,7 +10,7 @@ import { ALERT_LABEL, ROLE_LABEL, STATO_ESCALATION_LABEL } from "@/types/domain"
 
 export const metadata = { title: "Cruscotto" };
 
-export default async function DashboardPage() {
+async function DashboardPage() {
   const profile = await requireProfile();
   if (profile.ruolo !== "PROJECT_MANAGER" && profile.ruolo !== "AMMINISTRATIVO") return <OggiView profile={profile} />;
   const d = await getDashboard(profile);
@@ -101,3 +102,5 @@ export default async function DashboardPage() {
     </div>
   );
 }
+
+export default guard(DashboardPage);

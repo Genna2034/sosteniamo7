@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import { requireProfile } from "@/lib/security/authz";
 import { getReferenceData } from "@/lib/queries";
 import { signOutAction } from "@/lib/actions/auth";
@@ -6,7 +7,7 @@ import { ROLE_LABEL } from "@/types/domain";
 
 export const metadata = { title: "Profilo" };
 
-export default async function ProfiloPage() {
+async function ProfiloPage() {
   const profile = await requireProfile();
   const ref = await getReferenceData();
   const territorio = ref.territori.find(t => t.id === profile.territorio_id);
@@ -27,3 +28,5 @@ export default async function ProfiloPage() {
     </div>
   );
 }
+
+export default guard(ProfiloPage);

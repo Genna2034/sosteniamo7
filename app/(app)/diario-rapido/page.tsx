@@ -1,10 +1,11 @@
+import { guard } from "@/components/page-guard";
 import { getEducatorQuickData } from "@/lib/queries";
 import { QuickContactForm } from "@/components/forms/quick-contact-form";
 import { Empty, PageHeader, Panel } from "@/components/ui/primitives";
 
 export const metadata = { title: "Diario rapido" };
 
-export default async function DiarioRapidoPage() {
+async function DiarioRapidoPage() {
   const d = await getEducatorQuickData();
   return (
     <div className="mx-auto max-w-xl">
@@ -13,3 +14,5 @@ export default async function DiarioRapidoPage() {
     </div>
   );
 }
+
+export default guard(DiarioRapidoPage);

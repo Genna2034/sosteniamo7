@@ -1,3 +1,4 @@
+import { guard } from "@/components/page-guard";
 import { requireProfile, requireRole } from "@/lib/security/authz";
 import { getReferenceData, getRete } from "@/lib/queries";
 import { createActivityAction } from "@/lib/actions/attivita";
@@ -7,7 +8,7 @@ import { TIPO_ATTIVITA_LABEL } from "@/types/domain";
 
 export const metadata = { title: "Programma attività" };
 
-export default async function NuovaAttivitaPage() {
+async function NuovaAttivitaPage() {
   const profile = await requireProfile(); requireRole(profile, ["COORDINATORE", "PROJECT_MANAGER"]);
   const [ref, rete] = await Promise.all([getReferenceData(), getRete()]);
   const territori = profile.ruolo === "COORDINATORE" ? ref.territori.filter(t => t.id === profile.territorio_id) : ref.territori;
@@ -32,3 +33,5 @@ export default async function NuovaAttivitaPage() {
     </div>
   );
 }
+
+export default guard(NuovaAttivitaPage);
