@@ -20,3 +20,5 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
   return <AppShell profile={profile}>{children}</AppShell>;
 }
+
+export const dynamic = "force-dynamic";

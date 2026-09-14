@@ -8,7 +8,8 @@ export function guard<P>(page: (props: P) => Promise<ReactNode>) {
     try { return await page(props); }
     catch (e) {
       const digest = (e as { digest?: string })?.digest ?? "";
-      if (digest.startsWith("NEXT_")) throw e; // redirect() e notFound() devono passare
+      const msg0 = e instanceof Error ? e.message : "";
+      if (digest.startsWith("NEXT_") || digest === "DYNAMIC_SERVER_USAGE" || /Dynamic server usage/.test(msg0)) throw e; // redirect(), notFound() e bailout dinamico devono passare
       console.error("[pagina]", e);
       const profile = await getProfileOrNull().catch(() => null);
       const msg = e instanceof Error ? `${e.name}: ${e.message}` : JSON.stringify(e);
