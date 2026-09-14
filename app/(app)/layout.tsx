@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <main className="mx-auto max-w-md p-6">
         <h1 className="text-xl font-bold">Profilo non abilitato</h1>
         <p className="mt-2 text-sm text-[var(--ink-2)]">
-          L&apos;account {user.email} è autenticato ma non ha un profilo attivo nel progetto. Chiedi al Project Manager di abilitarlo, indicando ruolo, territorio ed ente di appartenenza.
+          L&apos;account {user.email} è autenticato ma non ha un profilo attivo nel progetto. Chiedi all'amministratore di Emmanuel di abilitarlo, indicando ruolo, territorio ed ente di appartenenza.
         </p>
         <form action={signOutAction} className="mt-5"><Button variant="secondary">Esci</Button></form>
       </main>

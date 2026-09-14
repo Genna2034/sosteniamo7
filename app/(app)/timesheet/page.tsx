@@ -23,7 +23,7 @@ async function TimesheetPage() {
       <div className="grid gap-5 lg:grid-cols-[1fr_1.4fr]">
         <Panel title="Registra ore">
           <div className="p-4">
-            {!profile.figura_id ? <p className="mb-3 rounded-md bg-[var(--ambra-soft)] p-3 text-sm text-[var(--ambra)]">Il tuo profilo non ha una figura professionale impostata: scegli quella corretta o chiedi al PM di configurarla.</p> : null}
+            {!profile.figura_id ? <p className="mb-3 rounded-md bg-[var(--ambra-soft)] p-3 text-sm text-[var(--ambra)]">Il tuo profilo non ha una figura professionale impostata: scegli quella corretta o chiedi all'amministratore di configurarla.</p> : null}
             <ActionForm action={createTimesheetAction} submitLabel="Invia per vidimazione">
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label="Data"><input name="data" type="date" className="field-input" defaultValue={todayIso()} min={cfg?.data_avvio} max={cfg?.data_fine_progetto} required /></Field>

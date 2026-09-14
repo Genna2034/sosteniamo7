@@ -20,7 +20,7 @@ export type ActionResult<T = undefined> =
   | { ok: false; error: string; code?: string; fieldErrors?: Record<string, string[]> };
 
 export const ROLE_LABEL: Record<AppRole, string> = {
-  PROJECT_MANAGER: "Project manager",
+  PROJECT_MANAGER: "Amministratore RTI (Emmanuel)",
   COORDINATORE: "Coordinatore di prossimità",
   EDUCATORE: "Educatore / case manager",
   PSICOLOGO: "Psicologo",

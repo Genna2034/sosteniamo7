@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   let profile;
   try { profile = await requireProfile(); requireRole(profile, ["PROJECT_MANAGER"]); }
-  catch { return NextResponse.json({ error: "Solo il Project Manager autenticato" }, { status: 403 }); }
+  catch { return NextResponse.json({ error: "Solo l'amministratore RTI autenticato" }, { status: 403 }); }
   const oggi = new Date().toISOString().slice(0, 10);
   const checks: Record<string, () => Promise<unknown>> = {
     riferimenti: () => q.getReferenceData(), dashboard: () => q.getDashboard(profile!), beneficiari: () => q.listMinori(), attivita: () => q.listAttivita(),
