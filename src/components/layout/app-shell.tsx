@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpenText, CalendarClock, ClipboardList, Clock3, FileBarChart2, Sun, MapPinned, ShieldAlert, UsersRound, LogOut, Sigma, LayoutDashboard } from "lucide-react";
+import { LogOut } from "lucide-react";
 import type { CurrentProfile } from "@/types/domain";
 import { ROLE_LABEL } from "@/types/domain";
 import { signOutAction } from "@/lib/actions/auth";
@@ -11,17 +11,17 @@ const OPERATIVI: Role[] = ["EDUCATORE", "COORDINATORE", "PSICOLOGO", "ASSISTENTE
 const DIREZIONE: Role[] = ["PROJECT_MANAGER", "COORDINATORE", "AMMINISTRATIVO"];
 
 const items: Item[] = [
-  { href: "/dashboard", label: "Oggi", short: "Oggi", Icon: Sun, roles: OPERATIVI, mobile: "all" },
-  { href: "/dashboard", label: "Cruscotto", short: "Cruscotto", Icon: LayoutDashboard, roles: ["PROJECT_MANAGER", "AMMINISTRATIVO"], mobile: "all" },
-  { href: "/beneficiari", label: "I ragazzi", short: "Ragazzi", Icon: UsersRound, roles: [...OPERATIVI, "PROJECT_MANAGER"], mobile: "all" },
-  { href: "/attivita", label: "Attività e registri", short: "Registri", Icon: CalendarClock, roles: [...OPERATIVI, "PROJECT_MANAGER"], mobile: "all" },
-  { href: "/diario-rapido", label: "Diario rapido", short: "Diario", Icon: BookOpenText, roles: ["EDUCATORE", "COORDINATORE"], mobile: ["EDUCATORE"] },
-  { href: "/timesheet", label: "Le mie ore", short: "Ore", Icon: Clock3, mobile: "all" },
-  { href: "/alert", label: "Alert e PER", short: "Alert", Icon: ShieldAlert, roles: [...OPERATIVI, "PROJECT_MANAGER"], mobile: ["COORDINATORE", "PROJECT_MANAGER"] },
-  { href: "/rete", label: "Comunità educante", short: "Rete", Icon: MapPinned, roles: [...OPERATIVI, "PROJECT_MANAGER"] },
-  { href: "/piae", label: "Registro PIAE", short: "PIAE", Icon: ClipboardList, roles: OPERATIVI },
-  { href: "/rendicontazione", label: "Rendicontazione", short: "Rendic.", Icon: Sigma, roles: DIREZIONE, mobile: ["AMMINISTRATIVO"] },
-  { href: "/report", label: "Report al RUP", short: "Report", Icon: FileBarChart2, roles: DIREZIONE, mobile: ["AMMINISTRATIVO"] },
+  { href: "/dashboard", label: "Oggi", short: "Oggi", icon: "sun", roles: OPERATIVI, mobile: "all" },
+  { href: "/dashboard", label: "Cruscotto", short: "Cruscotto", icon: "dashboard", roles: ["PROJECT_MANAGER", "AMMINISTRATIVO"], mobile: "all" },
+  { href: "/beneficiari", label: "I ragazzi", short: "Ragazzi", icon: "users", roles: [...OPERATIVI, "PROJECT_MANAGER"], mobile: "all" },
+  { href: "/attivita", label: "Attività e registri", short: "Registri", icon: "calendar", roles: [...OPERATIVI, "PROJECT_MANAGER"], mobile: "all" },
+  { href: "/diario-rapido", label: "Diario rapido", short: "Diario", icon: "book", roles: ["EDUCATORE", "COORDINATORE"], mobile: ["EDUCATORE"] },
+  { href: "/timesheet", label: "Le mie ore", short: "Ore", icon: "clock", mobile: "all" },
+  { href: "/alert", label: "Alert e PER", short: "Alert", icon: "alert", roles: [...OPERATIVI, "PROJECT_MANAGER"], mobile: ["COORDINATORE", "PROJECT_MANAGER"] },
+  { href: "/rete", label: "Comunità educante", short: "Rete", icon: "map", roles: [...OPERATIVI, "PROJECT_MANAGER"] },
+  { href: "/piae", label: "Registro PIAE", short: "PIAE", icon: "list", roles: OPERATIVI },
+  { href: "/rendicontazione", label: "Rendicontazione", short: "Rendic.", icon: "sigma", roles: DIREZIONE, mobile: ["AMMINISTRATIVO"] },
+  { href: "/report", label: "Report al RUP", short: "Report", icon: "report", roles: DIREZIONE, mobile: ["AMMINISTRATIVO"] },
 ];
 
 export function AppShell({ profile, children }: { profile: CurrentProfile; children: React.ReactNode }) {
@@ -37,7 +37,7 @@ export function AppShell({ profile, children }: { profile: CurrentProfile; child
             <div className="text-[1.35rem] font-extrabold leading-tight tracking-tight">SosteniAMO<br />il Quartiere</div>
             <div className="mt-1.5 text-xs text-white/65">Città Metropolitana di Napoli</div>
           </Link>
-          <nav className="grid gap-1"><NavLinks items={visible} variant="side" /></nav>
+          <nav className="grid gap-1"><NavLinks items={visible.map(({ href, label, short, icon }) => ({ href, label, short, icon }))} variant="side" /></nav>
           <div className="mt-auto flex items-center gap-3 rounded-xl bg-white/10 p-3 text-sm">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold">{iniziali}</div>
             <div className="min-w-0">
@@ -54,7 +54,7 @@ export function AppShell({ profile, children }: { profile: CurrentProfile; child
           <Link href="/profilo" className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-xs font-bold" aria-label="Profilo">{iniziali}</Link>
         </header>
         <main className="mx-auto max-w-6xl px-4 py-5 pb-28 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">{children}</main>
-        <nav className="no-print safe-bottom fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-[var(--line)] bg-white px-1 pt-1 lg:hidden" aria-label="Navigazione principale"><NavLinks items={mobile} variant="tab" /></nav>
+        <nav className="no-print safe-bottom fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-[var(--line)] bg-white px-1 pt-1 lg:hidden" aria-label="Navigazione principale"><NavLinks items={mobile.map(({ href, label, short, icon }) => ({ href, label, short, icon }))} variant="tab" /></nav>
       </div>
     </div>
   );
