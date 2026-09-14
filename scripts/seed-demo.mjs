@@ -46,8 +46,8 @@ for (const t of territori) {
     const { data: m, error } = await sb.from("minori").upsert({ codice_identificativo: codice, territorio_id: t.id, pseudonimo: `${nomi[i % nomi.length]} ${i}`, data_presa_in_carico: "2026-08-24", stato: "IN_CARICO", created_by: coord[t.codice] }, { onConflict: "codice_identificativo" }).select("id").single(); die(error, codice);
     minori[t.codice].push(m.id); seq++;
     const e = edu[t.codice][i % 2];
-    await ensure("assegnazioni_caso", { minore_id: m.id, utente_id: e, ruolo_nel_caso: "EDUCATORE_CASEMANAGER" }, { data_inizio: "2026-08-24", attiva: true, assegnato_da: coord[t.codice] });
-    if (i % 5 === 0) await ensure("assegnazioni_caso", { minore_id: m.id, utente_id: psi[t.codice], ruolo_nel_caso: "PSICOLOGO" }, { data_inizio: "2026-08-24", attiva: true, assegnato_da: coord[t.codice] });
+    await ensure("assegnazioni_caso", { minore_id: m.id, utente_id: e, ruolo_nel_caso: "EDUCATORE_CASEMANAGER" }, { data_inizio: "2026-08-24", attiva: true, created_by: coord[t.codice] });
+    if (i % 5 === 0) await ensure("assegnazioni_caso", { minore_id: m.id, utente_id: psi[t.codice], ruolo_nel_caso: "PSICOLOGO" }, { data_inizio: "2026-08-24", attiva: true, created_by: coord[t.codice] });
     const { data: p } = await sb.from("piae").upsert({ minore_id: m.id, versione: 1, educatore_referente_id: e, data_inizio: "2026-08-31", stato: "ATTIVO", contratto_sociale_firmato: i % 3 !== 0, data_firma_contratto: i % 3 !== 0 ? "2026-08-31" : null, created_by: coord[t.codice] }, { onConflict: "minore_id,versione" }).select("id").single();
     if (p && i <= 3) for (const [tipologia, d] of [["FORMATIVO", "Frequentare almeno il 70% delle sessioni del laboratorio entro ottobre"], ["RELAZIONALE", "Partecipare a due uscite di gruppo con il pari tutor entro settembre"], ["RESPONSABILITA", "Rispettare gli orari concordati per 4 settimane consecutive"]])
       await sb.from("piae_obiettivi").insert({ piae_id: p.id, tipologia, descrizione_smart: d, target_mensile: "verifica al 60° giorno" }).then(() => {});
@@ -65,7 +65,7 @@ for (const t of territori) for (const [tipo, titolo, ente] of lab) {
   for (let d = 2; d <= 9; d += 7) {
     const s = await ensure("sessioni_attivita", { attivita_id: a.id, data_sessione: `2026-09-${String(d).padStart(2, "0")}`, ora_inizio: "15:00" }, { ora_fine: "17:00", operatore_responsabile_id: edu[t.codice][0], stato: "EROGATA", luogo: "Sede di territorio" });
     if (!s) continue; sessCount++;
-    for (const [i, m] of iscritti.entries()) await sb.from("partecipazioni").upsert({ sessione_id: s.id, minore_id: m, stato_presenza: i % 4 === 3 ? "ASSENTE_INGIUSTIFICATO" : "PRESENTE", minuti_frequentati: i % 4 === 3 ? 0 : 120, registrato_da: edu[t.codice][0] }, { onConflict: "sessione_id,minore_id" });
+    for (const [i, m] of iscritti.entries()) await sb.from("partecipazioni").upsert({ sessione_id: s.id, minore_id: m, stato_presenza: i % 4 === 3 ? "ASSENTE_INGIUSTIFICATO" : "PRESENTE", minuti_frequentati: i % 4 === 3 ? 0 : 120, created_by: edu[t.codice][0] }, { onConflict: "sessione_id,minore_id" });
   }
   // Timesheet dell'educatore conduttore
   for (let d = 2; d <= 9; d += 7) await ensure("timesheet", { utente_id: edu[t.codice][0], attivita_id: a.id, data: `2026-09-${String(d).padStart(2, "0")}` }, { figura_id: fig("EDU"), territorio_id: t.id, ore: 3, descrizione: `Preparazione e conduzione: ${titolo}`, stato: "INVIATO" });
