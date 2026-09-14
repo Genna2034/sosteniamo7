@@ -23,7 +23,7 @@ async function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Cruscotto di progetto" lead={<>Vista {ROLE_LABEL[profile.ruolo].toLowerCase()} su {scope}. {giorniAllaFine != null ? (giorniAllaFine >= 0 ? `Mancano ${giorniAllaFine} giorni alla chiusura dell'erogazione (${shortDate(d.config?.data_fine_erogazione)}).` : `Erogazione chiusa il ${shortDate(d.config?.data_fine_erogazione)}: fase di rendicontazione.`) : null}</>} />
+      <PageHeader title="Cruscotto di progetto" lead={<>{ROLE_LABEL[profile.ruolo]}: vista su {scope}. {giorniAllaFine != null ? (giorniAllaFine >= 0 ? `Mancano ${giorniAllaFine} giorni alla chiusura dell'erogazione (${shortDate(d.config?.data_fine_erogazione)}).` : `Erogazione chiusa il ${shortDate(d.config?.data_fine_erogazione)}: fase di rendicontazione.`) : null}</>} />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Ragazzi in carico" value={sum("beneficiari_in_carico")} sub={`su ${target} previsti dal contratto`} tone="blu" progress={{ value: sum("beneficiari_in_carico"), max: target }} />

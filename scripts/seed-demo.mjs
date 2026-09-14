@@ -48,9 +48,9 @@ for (const t of territori) {
     const e = edu[t.codice][i % 2];
     await ensure("assegnazioni_caso", { minore_id: m.id, utente_id: e, ruolo_nel_caso: "EDUCATORE_CASEMANAGER" }, { data_inizio: "2026-08-24", attiva: true, created_by: coord[t.codice] });
     if (i % 5 === 0) await ensure("assegnazioni_caso", { minore_id: m.id, utente_id: psi[t.codice], ruolo_nel_caso: "PSICOLOGO" }, { data_inizio: "2026-08-24", attiva: true, created_by: coord[t.codice] });
-    const { data: p } = await sb.from("piae").upsert({ minore_id: m.id, versione: 1, educatore_referente_id: e, data_inizio: "2026-08-31", stato: "ATTIVO", contratto_sociale_firmato: i % 3 !== 0, data_firma_contratto: i % 3 !== 0 ? "2026-08-31" : null, created_by: coord[t.codice] }, { onConflict: "minore_id,versione" }).select("id").single();
+    const p = await ensure("piae", { minore_id: m.id, versione: 1 }, { educatore_referente_id: e, data_inizio: "2026-08-31", data_scadenza_prossima_revisione: "2026-10-30", stato: "ATTIVO", contratto_sociale_firmato: i % 3 !== 0, data_firma_contratto: i % 3 !== 0 ? "2026-08-31" : null, created_by: coord[t.codice] });
     if (p && i <= 3) for (const [tipologia, d] of [["FORMATIVO", "Frequentare almeno il 70% delle sessioni del laboratorio entro ottobre"], ["RELAZIONALE", "Partecipare a due uscite di gruppo con il pari tutor entro settembre"], ["RESPONSABILITA", "Rispettare gli orari concordati per 4 settimane consecutive"]])
-      await sb.from("piae_obiettivi").insert({ piae_id: p.id, tipologia, descrizione_smart: d, target_mensile: "verifica al 60° giorno" }).then(() => {});
+      await ensure("piae_obiettivi", { piae_id: p.id, tipologia }, { descrizione_smart: d, target_mensile: "verifica al 60° giorno" });
   }
 }
 console.log(`Beneficiari: ${seq}`);

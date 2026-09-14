@@ -13,7 +13,7 @@ export async function signInAction(_prev: ActionResult | null, formData: FormDat
     if (value.next && value.next.startsWith("/") && !value.next.startsWith("//")) next = value.next;
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.signInWithPassword({ email: value.email, password: value.password });
-    if (error) return { ok: false, error: "Email o password non corretti", code: "AUTH" };
+    if (error) { console.error("[login]", error.message, error.status); return { ok: false, error: "Email o password non corretti", code: "AUTH" }; }
     try { await supabase.rpc("log_security_event", { p_action: "LOGIN", p_table: "auth", p_reason_code: "PASSWORD" }); } catch { /* audit best-effort */ }
   } catch (e) { return actionFailure(e); }
   redirect(next);
